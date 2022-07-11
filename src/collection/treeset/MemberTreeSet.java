@@ -1,27 +1,28 @@
-package collection.hashset;
+package collection.treeset;
 
-import java.util.HashSet;
+
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import collection.Member;
 
-public class MemberHashSet {
-	private HashSet<Member> hashSet;
+public class MemberTreeSet {
+	private TreeSet<Member> treeSet;
 	
-	public MemberHashSet() {
-		hashSet = new HashSet<>();
+	public MemberTreeSet() {
+		treeSet = new TreeSet<>(new Member());
 	}
 	
 	public void addMember(Member member) {
-		hashSet.add(member);
+		treeSet.add(member);
 	}
 	
 	public boolean removeMember(int memberId) {
-		Iterator<Member> iterator = hashSet.iterator();
+		Iterator<Member> iterator = treeSet.iterator();
 		Member member = iterator.next();
 		int tempId = member.getMemberId();
 		if(memberId == tempId) {
-			hashSet.remove(member);
+			treeSet.remove(member);
 			return true;
 		}
 		System.out.println(memberId + "가 존재하지 않습니다.");
@@ -29,10 +30,10 @@ public class MemberHashSet {
 	}
 	
 	public void showAll() {
-		for(Member member : hashSet) {
+		for(Member member : treeSet) {
 			System.out.println(member);
 		}
 		System.out.println();
-		System.out.println(hashSet);
+		System.out.println(treeSet);
 	}
 }
