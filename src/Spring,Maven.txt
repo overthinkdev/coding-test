@@ -1,0 +1,104 @@
+filter => 디스패처 => 인터터처 => AOP => controller
+
+
+##스프링강의
+https://www.youtube.com/watch?v=rHJgMRimJ4Y&list=PLlTylS8uB2fBOi6uzvMpojFrNe7sRmlzU&index=1
+
+###Maven
+작업과정에서 반복되는것들을 효율적으로 하게끔 도와준다.
+
+
+IDE : 형상관리,디버서,컴파일러,탐색기,콘솔,편집기
+
+###빌드도구 : 프로젝트생성,라이브러리 설정, 코드작업,컴파일,테스트,패키지만들기, 인스톨,배포 등을 도와주는 도구
+###종류 : Maven(Gradle, Ant), Git(형상관리), JUnit(테스트도구)
+
+###Maven
+Apache에서 제공하는 빌드도구이다.
+
+#Build Lifecycle Basics
+
+- Phase,Plug-in,Goal
+- 단계(Phase) : compile => test => packeage => install => deploy
+위에적지 않은 다른 구성단계들도있다.
+단계를 실행하는 프로그램은 따로있다.
+mvn compile 처럼 명령어를 입력하면 입력한 단계까지 실행한다.
+단계를 실행하는 프로그램을 메이븐에서는 Plug-in 이라고한다.
+이 Plug-in을 교체하거나 설정하거나 빼는걸 POM.xml 에서한다.
+
+-정리-
+Maven이라는 빌드도구에는 단계(Phase)가 있고
+실행하는 소프트웨어 이름이 Plug-in 이고
+그 plug-in 안에 Goal이라는 것이 있다...
+
+#pom.xml
+프로젝트 환경변경을 도와주는 파일
+<packaging> 안에 jar,war를 입력 후 프로젝트 마우스 우클릭 maven update
+
+jar : 자바 프로젝트
+war : 웹개발을 위한 프로젝트
+war패킹시(/webapp/WEB-INF/web.xml)이 필요하다.
+
+#라이브러리
+Maven Repository 사이트가있다(Maven저장소)
+원격에있는 Maven저장소에서 라이브러리, 프로젝트모델 들을
+로컬저장소의 ${user.home}/.m2/repository에 가져와서 담을 수 있다.
+
+pom.xml 파일 안에 <dependencies> 태그안에 원격중앙저장소에서 라이브러리버전을 검색해서 복사해서 가져온다.
+
+#라이브러리 오류 문제
+Maven이 원격저장소에서 로컬저장소에 다운로드 하는 와중에,
+링크가 깨지거나 오류가 생기는 경우가 있다.
+
+user.home.m2 안에 repository를 전부 삭제하고 새로 update 받는다.
+
+
+
+##뉴렉
+https://www.youtube.com/watch?v=XtXHIDnzS9c&list=PLq8wAnVUcTFUHYMzoV2RoFoY2HDTKru3T&index=1
+
+#################################### Spring Framwork ##########
+
+DAO나 Service 라고하는 계층을 이용해서 함수들을 나누는데
+jdbc가 제공하고 있는 컬렉션을 공유하기가 어렵다.
+jdbc자체의 트랙션 관리는 불가능하다.
+
+#특징
+- 단순하게 라이브러리를 사용해서 깔끔하게 처리,
+- DI 로 모듈결합을 쉽게해준다.
+
+JAVA EE에서 제공하던 기능들을 (개발을위한 API 겹합력낮추는 DI, DB Transaction처리,로그처리 등등...)
+JAVA SE와 SPRING을 사용해서 구현한다.
+
+MVC : DI - 느슨한 결합력과 인터페이스
+트랜잭션 : AOP - 
+인증과 권한 : Servlet Filter
+
+소스코드없이 수정할수있으면 결합력이 낮다.
+
+###DI(Dependency Injection)의존성 주입
+- Composition has a : 일체형
+- Association has a : 조립형
+- Setter Injection : B b = new B(); A a= new A(); a.setB(b);
+- Construction Injection : A a= new A(b);
+
+객체의 필드를 대신 셋팅해준다.
+XML 이나 Anootation 으로도 가능하다.
+
+#IoC(Inversion of Control)제어의역전
+- A->B->C->D 로 호출되는 객체필드들을 역순으로 구성하는것을  이라고한다.
+
+- IocContainer 는 역순으로 구성하는것을 셋팅(인스턴스화)까지해준다.
+Class.forName("");
+clazz.detDeclaredConstructor(); //상위버전
+clazz.newInstace();// jdk1.8버전
+
+DI 지시서 작성하기
+<bean id="사용할변수명" class="패키지명(사용할객체)" >
+	<property name="메소드명" value="id값" ref="id값"> </property>
+</bean>
+
+#규칙
+메소드명 : 소문자로기입한다. class에 setter메소드를 가지고있어야한다. 
+value, ref : 넣을 값에 타입에 따라 value(기본값), ref(참조) 입력. 
+

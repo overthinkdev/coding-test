@@ -1,0 +1,274 @@
+Servlet AND JSP
+
+WAS(Web Application Server)
+Context로 다른폴더,경로에 있어도 경로를 지정해줄 수 있다. path="name" docBase="참조경로"
+메모장에 JDK를 사용해서 컴파일한 후 Class 파일을 연결해 Tomcat 서블릿을 이용한다. (IDE이클립스가 해주는것이다)
+WEB-INF는 클라이언트가 호출할 수 없다, 중간역할인 Sevlet이 해준다.
+Stream(입출력)의 내용이 8bit 이하일경우 Buffer에 대기시켜서 8bit이상이 될때 보내준다.
+적은내용이라면 강제로 보내도록 설정 할 수 있다. (os,true)
+Writer을 더 많이 쓴다 (Stream 보다)
+
+http://의 보안이 강화된 버전이 https://
+Extends HttpServlet 을 상속받을경우 (Request, Response)을 인자값으로 받는 메소드를 오버라이딩 해서 사용할 수 있다.
+
+xml & Annotation 으로 서블릿과 코드를 매핑해주는데, metadata - complete="true" 일시 모든 설정을 매핑한다.
+							"false"로 설정할시 다른 매핑.xml도 있다고 알림
+
+브라우저에서 Context 형식을 알려주지않을경우 브라우저별로 자의적인해석을 한다. ex) Chrome=text , MsEdge=html
+
+Web.xml 설정에서 Encoding에 관한 내용
+Enc 기본은 ISO-8859-1 이다.
+EUC-KR 은 한국어, 와 UTF-8은 같지않다, 한글은 한자당 2byte 로 처리한다.
+ContentType을 text/html UTF-8로 설정해줘야 해석도 UTF-8로 해석한다. (브라우저가)
+response.setCharacterEncoding("UTF-8");
+response.setContentType("text/html; charset=UTF-8");
+
+QueryString은 무조건 문자열로 받아온다 (String 값)
+
+/hello?cnt=3   ---> "3"			NULL = 참조값 없으면 true
+/hello?cnt=    ---> ""			Empty = "" 문자열의 길이가 0 이면 true
+/hello?        ---> null		Blank = "  " 문자열안에 공백이나 띄어쓰기만 있을경우 true
+/hello	       ---> 
+
+form은 값을 받아올 양식지
+action에 sevlet 매핑 주소를 적는다, submit 하면 그 매핑주소로 요청(request)이 간다, name에 "키값" 이 있으면 
+Query값으로 바꿔준다.
+
+========================EX=============================
+@WebServlet("/hello")             /* Annotation 인데 WebServlet 에 요청할 경로? 이름 ? 지정
+메소드이름(인자값){}
+
+[html,jsp파일 body내용]
+<form action="hello">
+	<input type="text" name="키값" />
+	<input type="submit" value="출력"/>
+</form>
+========================EX=============================
+
+QueryString으로 값을 받아올때 한글파일이 깨지는데,
+그렇다고해서 톰켓 서버의 URIEncoding 값을 바꾸지는 않는다. (다른 서버도 사용할 수 있기 때문)
+대체해서 reqeust.setCharacterEncoding("UTF-8");로 코드에서 지정해 줄 수 있다.
+
+요청방식이 적으면 GET 많으면 POST(보안도됨 URI 주소에 값이 안나옴)
+URI 주소는 한계가있다. (정해진 길이를 넘을 수 없다.)
+f12 개발자 툴에서 network는 요청되는것들을 캡처주어서 중간중간 확인하고 볼수있다.(Request로 받아온 값의 Enc도 확인 가능)
+
+			requeset
+웹서버 <------> WAS(아파치톰캣) <--------> Servlet Container(메모리상에존재하게되는데 그때 존재하는 공간을 이르는 말)
+			reponse
+
+			여기중간에 끼울수있는 소프트웨어가있다.(문지기역할)Interceptor
+
+reqeust.setCharacterEncoding("UTF-8"); 대신 web.xml에서 filter 을 사용할 수 있다.
+
+Filter을 인터페이스로 상속받은 구현클래스 위에 @WebFilter("/*") 를 적어줄 경우 필터해준다.
+
+@Override
+doFilet(){
+	request.setCharacterEncoding("UTF-8");
+	chain.doFilter(request,response);
+}
+
+값을 받아와서 처리할때 null,empty,blank 조건으로 잘 거르기
+String을 필요한 타입으로 형변환하기
+버튼에 name값을 추가하여 받아오는 name값을 변수에 getParameter ("name값") == value="x" 저장해서 조건처럼 사용 할 수 있다.
+if(변수.equals("x")){
+	~~~~
+}
+
+name을 같게 맞춰주면 배열로 request 된다.
+받아올때는 String[] num = getParameterValues("name");
+				for(){
+					for문 안에서의 선언은 반복되지않는다, int a;이런거
+					연산은 반복된다. 
+				}
+
+---'상태를 유지'의 필요성 //Sevlet전역변수를 가지고 있지않다.
+그래서 ServletContext(어플리케이션저장소) 안에 application, session, cookie 객체 에 담아놓았다가 쓴다.
+
+setAttribute(name, object); 값 삽입 (Map)컬렉션과 같다.
+getAttribute("name"); 값호출
+ServletContext 는 Object 타입
+
+
+---Session 객체로 상태 값 저장하기
+Application객체는 전역에서 사용할수있고
+Session 객체는 Session 범주에서만 쓸수있다
+(Session이 다르다 == 사용자가 다르다)
+
+---웹 서버가 (현재 사용자)Session 을 구분하는 방식
+Client는 요청할때 SID라는(식별자) 개념이 있음 브라우저를 닫았다 열면 SID는 사라짐,바뀜
+SID == Cookie
+Application(static) 전역변수
+Request(stak) 스택
+Session은 포인터 번지수처럼(heap) 읽힌다.
+
+---Session Method
+void invalidate() : 세션에서 사용되는 객체들을 바로 해제 (기본 timeOut은 30분)
+void setMaxInactiveInterval(int interval) : 세션 타임아웃을 정수(초)로 설정
+boolean isNew() : 세션이 새로 생성되었는지를 확인
+Long getCreationTime() : 세션이 시작된 시간을 반환, 1970년 1월1일을 시작으로 하는 밀리초	
+long getLastAccessedTime() : 마지막 요청 시간, 1970년 1월1일을 시작으로 하는 밀리초
+
+---상태 Cookie를 이용해 상태 값 유지하기
+Cookie 저장소는 Client 쪽(브라우저)에 있다.
+Cookie값으로 보낼수있는 값은 String(문자열) 이여야하고, url로 사용할수 있는 형태의 문자열만
+clinet가 요청할때 Header설정(TCP/IP, 헤더정보(...)와 데이터설정(사용자데이터)
+Cookie x = new Cookie("c", String,valueOf(result));
+Cookie[] x = request.getCookies(); 쿠키를 얻는 함수
+response.addCookie(); 쿠키를 추가해서 reponse 하는 함수
+if(cookies !=null)
+	for(Cookie cookie : cookies)
+		if("c".equals(cooke.getName()))
+			c_=cookie.getValue();
+
+---Cookie의 path 옵션
+Cookie.setpath("/");  '/'모든페이지 '/name/' 'url경로' 를요청할때마다 쿠키를 가져와라 
+Cookie.setMaxAge(1000); 만료날짜 안에 값은 '초' 단위로 계산 (정하지않으면 브라우저 닫히면 만료됨)
+
+
+---Application, Cookie, Session 저장소의 특징과 차이
+-Application
+사용범위 : 전역범위 에서 사용하는 저장공간
+생명주기 : WAS가 시작해서 종료할 때 까지
+저장위치 : WAS서버의 메모리(컨테이너)
+-Session  
+사용범위: 세션 범위(heap 번지수값)에서 사용하는 저장공간
+생명주기 : 세션이 시작해서 종료할 때 까지
+저장위치 : WAS 서버의 메모리(컨테이너)
+-Cookie ==SID
+사용범위 : Web Browser별 지정한 path(특정URL) 범주 공간
+생명주기 : Browser에 전달한 시간 부터 만료시간(setMaxAge) 까지
+저장위치 : Web Browser의 메모리 또는 파일
+
+--redirect: 페이지전환
+response.sendRedirect("");
+
+url 이없다 404
+url은 있지만 내가처리할수있는 요청이없다 405
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+--동적인 페이지(JSP) <-Jasper 다름 			<td colspan="4" ></td> 나도 4칸 혼자쓰겠다.
+WAS(톰캣)서버 Sevlet
+이클립스에잇는 개발디렉토리를 참조하는게아니라 Tomcat에 별도의 복사본 홈디렉토리로 옮겨지게된다
+
+
+
+<% %> 일반 로직 코드블록
+<%= %> 출력 코드블록
+<%! %> 멤버함수 멤버변수에 들어가고싶은내용 코드블록
+<%@ %> 지시블록
+
+--JSP 는 내장객체가존재한다. (keyword)
+-HttpServletRequest
+getParameterNames() : 사용자가 전달한 키들을 Enumeration 객체로 변환
+getParameter(name) : 사용자가 전달한 name과 일치하는 값을 변환
+getParamaeterValues(name) : 사용자가 전달한 name과 일치하는 값을 배열형식으로 반환
+getCookies() : 클라이언트에서 전달한 쿠키를 배열 형식으로 반환
+getMethod() : 현재 요청방식이 GET인지 POST인지 문자열로 반환
+getSession() : 현재 세션 객체를 반환
+getRemoteAddr() : 클라이언트의 IP주소를 반환
+getProtocol() : 현재 서버의 프로토콜을 문자열로 반환
+setCharacterEncoding() : 현재 JSP로 전달되는 내용을 지정한 문자셋으로 변환해준다.
+getHeaderNames() : 현재 요청이 가지는 헤더의 이름들을 반환
+getHeaders(name) : 현재 요청한 헤더에서 지정한 이름의 모든 값들을 반환
+getQueryString() : 현재 요청에 포함된 쿼리문자열을 반환
+
+-HttpServletResponse
+setContentType(type) : 컨텐트 형식을 설정
+setHeader(name, value) : 클라이언트에게 헤더로 전달할 값을 설정
+setDateHeader(name, date) : 클라이언트에게 헤더로 전달할 날짜를 설정
+sendError(status, msg) : 클라이언트에게 에러코드와 메시지를 전달
+sendRedirect(url) : 클라이언트 요청을 다른 페이지로 전달 (PRG POST Redirect GET) 라는것도있음
+encodeURL(url) : URL로 유효하지 않은 문자를 인코딩
+setStatus(sc) : 상태 코드를 설정
+
+-HttpSession
+getID() : 각 접속에 대한 세션 고유의 id를 문자열형태로 반환
+getCreationTime() : 세션이 생성된 시간을 밀리세컨드 값으로 반환
+getlastAccessedTime() : 현재 세션으로 마지막 작업한 시간을 밀리센커드값으로 반환
+getMaxInactiveInterval() : 세션 유지 시간을 초로 반환
+setMaxInactiveInterval() : 세션 유효시간을 t에 설정된 초 값으로 설정
+invalidate() : 현재 세션을 종료, 세션과 관련한 값을 모두 지움
+getAttribute(attr) : 문자열 attr로 설정된 세션값을 object형태로 반환
+setAttribute(name,attr) : 문자열 name으로 attr을 설정
+removeAttribute(name) : 세션에 설정한 속성 값을 삭제
+
+-ServletContext (application 객체)
+setAttribute(name,value) : application 범위의 값 설정
+getAttribute(name) : application 범위의 값 얻기
+getRealPath(path) : 실제 물리 경로를 반환
+getResource(path) : path 경로의 리소스를 가리키는 URL을 반환
+getServerInfo() : 현재 요청방식이 GET인지 POST인지를 문자열로 반환
+getSession() : 현재 세션 객체를 반환
+getRemoteAddr() : 클라이언트의 IP 주소를 반환
+getProtocol() : 현재 서버의 프로토콜을 문자열로 반환
+setCharacterEncoding() : 현재 JSP로 전달되는 내용을 지정한 문자셋으로 변환해준다
+
+
+forward : 현재 작업한 내용을 이어갈수 있도록 무언갈 공유한다.
+redirect : 새로운 요청을함
+
+상태를 저장할 수 있는 저장소 
+내장객체 4가지 pageContext(페이지에서 혼자사용), Request(forward 관계에서 사용할수있는), Session(session에서 공유될수있는), Page(모든 세션 모든페이지에서 공유될수있는 저장소), // cookie(클라이언트에 저장할수있는)
+
+--EL view  를 위한 데이터표현식
+
+--EL 같은 키워드일경우 우선순위 저장소 page, request, session, application
+특정한 저장소에서만 값을 추출하고싶으면 저장소이름Scope.키값
+
+--EL 연산자
+empty == null || ''
+lt < ,gt >, le, ge, gl, eq, ne // xml 처럼 엄격한 곳에서 사용 연산자
+
+--Entity 개념화된 데이터 (개체),(객체), (구조적인 데이터)
+
+
+--JSTL ( Jsp Standard Tag Library) 표준형들이 있다
+<%@ taglib prefix="c" uri=" http://java.sun.com/jsp/jstl/core" %>
+
+<c:forEach> 태그 var="n"키워드 items 속성 ="${list}"
+태그라이브러리 Core, Formating, Functions, //SQl, XML 쓰지않는게 바람직하다 (옛날방식)
+
+URI,URL ,URN 차이 검색해보기
+
+
+******************************************중간 요약 정리 ********************************************************
+서블릿 => 자바 웹 프로그램 
+		웹 => 입/출력 - request, response	===============>	웹문서출력|html=> 문서기반(jsp)Jasper의 코드블록 => 스파게티(코드가너무많고지저분해짐) => MVC패턴 등장 
+				request - 입력설정(UTF-8), 입력값 읽기		|=> View에서 코드블록이 꼭 필요한 경우 => EL, JSTL(제어담당)
+				response - 출력설정(UTF-8), 출력 스트림		|
+******************************************중간 요약 정리 ********************************************************
+JSTL 태그 종류들
+<foreach var="n" items="${list}" begin="1" end="3" varStatus="st"> 반복될때 list[인덱스값] begin 처음, end 끝  ${st.current | first,last 블린값 | index | count 횟수 | step 인덱스값 증가}
+
+format 태그의 종류들이있다.사용하려면 검색 <%@ taglib prefix="fmt" uri=" http://java.sun.com/jsp/jstl/fmt" %>
+function 태그의 종류들이있다. 사용하려면 검색 <%@ taglib prefix="fn" uri=" http://java.sun.com/jsp/jstl/functions" %>
+	jstl function custom
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
